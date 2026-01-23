@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Cards</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <button id="backBtn" class="btn-icon hidden" aria-label="Go back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <h1 id="headerTitle">Flash Cards</h1>
+            <button id="menuBtn" class="btn-icon" aria-label="Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="mainContent">
+            <!-- Categories View -->
+            <section id="categoriesView" class="view active">
+                <div class="view-header">
+                    <h2>Categories</h2>
+                    <button id="addCategoryBtn" class="btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Category
+                    </button>
+                </div>
+                <div id="categoriesList" class="grid-list"></div>
+                <div id="emptyCategoriesState" class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <h3>No Categories Yet</h3>
+                    <p>Create your first category to get started</p>
+                </div>
+            </section>
+
+            <!-- Decks View -->
+            <section id="decksView" class="view">
+                <div class="view-header">
+                    <h2 id="decksTitle">Decks</h2>
+                    <button id="addDeckBtn" class="btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Deck
+                    </button>
+                </div>
+                <div id="decksList" class="grid-list"></div>
+                <div id="emptyDecksState" class="empty-state">
+                    <div class="empty-icon">🗂️</div>
+                    <h3>No Decks Yet</h3>
+                    <p>Create your first deck in this category</p>
+                </div>
+            </section>
+
+            <!-- Cards View -->
+            <section id="cardsView" class="view">
+                <div class="view-header">
+                    <h2 id="cardsTitle">Cards</h2>
+                    <div class="header-actions">
+                        <button id="studyBtn" class="btn-secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Study
+                        </button>
+                        <button id="addCardBtn" class="btn-primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Add Card
+                        </button>
+                    </div>
+                </div>
+                <div id="cardsList" class="cards-list"></div>
+                <div id="emptyCardsState" class="empty-state">
+                    <div class="empty-icon">🃏</div>
+                    <h3>No Cards Yet</h3>
+                    <p>Add cards to start learning</p>
+                </div>
+            </section>
+
+            <!-- Study View -->
+            <section id="studyView" class="view">
+                <div class="study-container">
+                    <div class="study-progress">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <span id="progressText">0 / 0</span>
+                    </div>
+                    <div id="flashcard" class="flashcard">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div id="cardFrontImage" class="card-image"></div>
+                                <div id="cardFrontText" class="card-text"></div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div id="cardBackText" class="card-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tap-hint">Tap card to flip</p>
+                    <div class="study-controls">
+                        <button id="prevCardBtn" class="btn-control">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button id="shuffleBtn" class="btn-control">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+                                <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+                                <line x1="4" y1="4" x2="9" y2="9"/>
+                            </svg>
+                        </button>
+                        <button id="nextCardBtn" class="btn-control">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modals -->
+        <div id="modalOverlay" class="modal-overlay">
+            <!-- Category Modal -->
+            <div id="categoryModal" class="modal">
+                <div class="modal-header">
+                    <h3 id="categoryModalTitle">Add Category</h3>
+                    <button class="btn-close" data-close-modal>×</button>
+                </div>
+                <form id="categoryForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="categoryName">Category Name</label>
+                        <input type="text" id="categoryName" placeholder="e.g., Languages, Science, History" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryColor">Color</label>
+                        <div class="color-picker">
+                            <button type="button" class="color-option" data-color="#6366f1" style="background:#6366f1"></button>
+                            <button type="button" class="color-option" data-color="#8b5cf6" style="background:#8b5cf6"></button>
+                            <button type="button" class="color-option" data-color="#ec4899" style="background:#ec4899"></button>
+                            <button type="button" class="color-option" data-color="#f43f5e" style="background:#f43f5e"></button>
+                            <button type="button" class="color-option" data-color="#f97316" style="background:#f97316"></button>
+                            <button type="button" class="color-option" data-color="#eab308" style="background:#eab308"></button>
+                            <button type="button" class="color-option" data-color="#22c55e" style="background:#22c55e"></button>
+                            <button type="button" class="color-option" data-color="#14b8a6" style="background:#14b8a6"></button>
+                            <button type="button" class="color-option" data-color="#0ea5e9" style="background:#0ea5e9"></button>
+                            <button type="button" class="color-option" data-color="#64748b" style="background:#64748b"></button>
+                        </div>
+                        <input type="hidden" id="categoryColor" value="#6366f1">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryIcon">Icon</label>
+                        <div class="icon-picker">
+                            <button type="button" class="icon-option selected" data-icon="📚">📚</button>
+                            <button type="button" class="icon-option" data-icon="🌍">🌍</button>
+                            <button type="button" class="icon-option" data-icon="🔬">🔬</button>
+                            <button type="button" class="icon-option" data-icon="📐">📐</button>
+                            <button type="button" class="icon-option" data-icon="🎨">🎨</button>
+                            <button type="button" class="icon-option" data-icon="🎵">🎵</button>
+                            <button type="button" class="icon-option" data-icon="💻">💻</button>
+                            <button type="button" class="icon-option" data-icon="🏛️">🏛️</button>
+                            <button type="button" class="icon-option" data-icon="⚗️">⚗️</button>
+                            <button type="button" class="icon-option" data-icon="🧮">🧮</button>
+                            <button type="button" class="icon-option" data-icon="📖">📖</button>
+                            <button type="button" class="icon-option" data-icon="🎯">🎯</button>
+                        </div>
+                        <input type="hidden" id="categoryIcon" value="📚">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" data-close-modal>Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Deck Modal -->
+            <div id="deckModal" class="modal">
+                <div class="modal-header">
+                    <h3 id="deckModalTitle">Add Deck</h3>
+                    <button class="btn-close" data-close-modal>×</button>
+                </div>
+                <form id="deckForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="deckName">Deck Name</label>
+                        <input type="text" id="deckName" placeholder="e.g., Spanish Vocabulary, Chapter 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deckDescription">Description (optional)</label>
+                        <textarea id="deckDescription" placeholder="Brief description of this deck"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" data-close-modal>Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Card Modal -->
+            <div id="cardModal" class="modal modal-large">
+                <div class="modal-header">
+                    <h3 id="cardModalTitle">Add Card</h3>
+                    <button class="btn-close" data-close-modal>×</button>
+                </div>
+                <form id="cardForm" class="modal-form">
+                    <div class="card-preview-container">
+                        <div class="card-preview-label">Front</div>
+                        <div class="form-group">
+                            <label for="cardFront">Word / Phrase</label>
+                            <input type="text" id="cardFront" placeholder="e.g., Hola, Mitochondria" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardImage">Image (optional)</label>
+                            <div class="image-upload">
+                                <input type="file" id="cardImage" accept="image/*">
+                                <div id="imagePreview" class="image-preview">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <polyline points="21 15 16 10 5 21"/>
+                                    </svg>
+                                    <span>Click to upload image</span>
+                                </div>
+                            </div>
+                            <button type="button" id="removeImageBtn" class="btn-text hidden">Remove Image</button>
+                        </div>
+                    </div>
+                    <div class="card-preview-container">
+                        <div class="card-preview-label">Back</div>
+                        <div class="form-group">
+                            <label for="cardBack">Description / Answer</label>
+                            <textarea id="cardBack" placeholder="e.g., Hello (Spanish greeting), The powerhouse of the cell" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" data-close-modal>Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Context Menu Modal -->
+            <div id="contextMenu" class="context-menu">
+                <button id="editItemBtn" class="context-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit
+                </button>
+                <button id="deleteItemBtn" class="context-item danger">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Delete
+                </button>
+            </div>
+
+            <!-- Confirm Delete Modal -->
+            <div id="confirmModal" class="modal modal-small">
+                <div class="modal-header">
+                    <h3>Confirm Delete</h3>
+                    <button class="btn-close" data-close-modal>×</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">Are you sure you want to delete this item?</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-close-modal>Cancel</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
