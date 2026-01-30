@@ -677,29 +677,38 @@ function initStudyMode() {
     updateStudyProgress();
 }
 
-function updateStudyCard() {
+function updateStudyCard(skipFlipReset = false) {
     const card = state.studyCards[state.studyIndex];
     if (!card) return;
     
-    // Reset flip state
-    elements.flashcard.classList.remove('flipped');
+    const updateContent = () => {
+        // Update front
+        if (card.image) {
+            elements.cardFrontImage.innerHTML = `<img src="${card.image}" alt="Card image">`;
+            elements.cardFrontImage.style.display = 'block';
+        } else {
+            elements.cardFrontImage.innerHTML = '';
+            elements.cardFrontImage.style.display = 'none';
+        }
+        elements.cardFrontText.textContent = card.front;
+        
+        // Update back
+        elements.cardBackText.textContent = card.back;
+        
+        // Update button states
+        elements.prevCardBtn.disabled = state.studyIndex === 0;
+        elements.nextCardBtn.disabled = state.studyIndex === state.studyCards.length - 1;
+    };
     
-    // Update front
-    if (card.image) {
-        elements.cardFrontImage.innerHTML = `<img src="${card.image}" alt="Card image">`;
-        elements.cardFrontImage.style.display = 'block';
+    // If card is flipped and we're not skipping reset, flip back first then update
+    if (!skipFlipReset && elements.flashcard.classList.contains('flipped')) {
+        elements.flashcard.classList.remove('flipped');
+        // Wait for flip animation to complete before updating content
+        setTimeout(updateContent, 300);
     } else {
-        elements.cardFrontImage.innerHTML = '';
-        elements.cardFrontImage.style.display = 'none';
+        elements.flashcard.classList.remove('flipped');
+        updateContent();
     }
-    elements.cardFrontText.textContent = card.front;
-    
-    // Update back
-    elements.cardBackText.textContent = card.back;
-    
-    // Update button states
-    elements.prevCardBtn.disabled = state.studyIndex === 0;
-    elements.nextCardBtn.disabled = state.studyIndex === state.studyCards.length - 1;
 }
 
 function updateStudyProgress() {
@@ -742,6 +751,102 @@ function shuffleCards() {
     updateStudyCard();
     updateStudyProgress();
     showToast('Cards shuffled!');
+}
+
+// ===== Swipe Gesture Handler =====
+
+const swipeHandler = {
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    threshold: 50,      // Minimum distance for swipe
+    velocityThreshold: 0.3, // Minimum velocity
+    restraint: 100,     // Maximum perpendicular distance
+    allowedTime: 500,   // Maximum time for swipe
+    
+    handleTouchStart(e) {
+        const touch = e.changedTouches[0];
+        this.startX = touch.pageX;
+        this.startY = touch.pageY;
+        this.startTime = Date.now();
+    },
+    
+    handleTouchEnd(e, callbacks) {
+        const touch = e.changedTouches[0];
+        const distX = touch.pageX - this.startX;
+        const distY = touch.pageY - this.startY;
+        const elapsedTime = Date.now() - this.startTime;
+        
+        if (elapsedTime <= this.allowedTime) {
+            const velocity = Math.abs(distX) / elapsedTime;
+            
+            // Horizontal swipe
+            if (Math.abs(distX) >= this.threshold && 
+                Math.abs(distY) <= this.restraint &&
+                velocity >= this.velocityThreshold) {
+                
+                if (distX > 0 && callbacks.onSwipeRight) {
+                    callbacks.onSwipeRight();
+                    return true;
+                } else if (distX < 0 && callbacks.onSwipeLeft) {
+                    callbacks.onSwipeLeft();
+                    return true;
+                }
+            }
+            
+            // Vertical swipe
+            if (Math.abs(distY) >= this.threshold && 
+                Math.abs(distX) <= this.restraint &&
+                velocity >= this.velocityThreshold) {
+                
+                if (distY > 0 && callbacks.onSwipeDown) {
+                    callbacks.onSwipeDown();
+                    return true;
+                } else if (distY < 0 && callbacks.onSwipeUp) {
+                    callbacks.onSwipeUp();
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+};
+
+function initSwipeListeners() {
+    // Study view swipe - navigate cards
+    elements.flashcard.addEventListener('touchstart', (e) => {
+        swipeHandler.handleTouchStart(e);
+    }, { passive: true });
+    
+    elements.flashcard.addEventListener('touchend', (e) => {
+        const handled = swipeHandler.handleTouchEnd(e, {
+            onSwipeLeft: () => nextCard(),
+            onSwipeRight: () => prevCard(),
+            onSwipeUp: () => flipCard(),
+            onSwipeDown: () => flipCard()
+        });
+        
+        // Only flip on tap if swipe wasn't detected
+        // Tap is handled by click event
+    });
+    
+    // Category/Deck/Card list swipe - go back
+    const swipeBackViews = [elements.decksView, elements.cardsView];
+    swipeBackViews.forEach(view => {
+        view.addEventListener('touchstart', (e) => {
+            swipeHandler.handleTouchStart(e);
+        }, { passive: true });
+        
+        view.addEventListener('touchend', (e) => {
+            // Only trigger if not swiping on an interactive element
+            if (!e.target.closest('.grid-item, .card-item, button')) {
+                swipeHandler.handleTouchEnd(e, {
+                    onSwipeRight: () => goBack()
+                });
+            }
+        });
+    });
 }
 
 // ===== Event Listeners =====
@@ -853,13 +958,58 @@ function initEventListeners() {
     });
 }
 
+// ===== Service Worker Registration =====
+
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('ServiceWorker registered:', registration.scope);
+            })
+            .catch(error => {
+                console.log('ServiceWorker registration failed:', error);
+            });
+    }
+}
+
 // ===== Initialize App =====
 
 function init() {
     loadData();
     initEventListeners();
+    initSwipeListeners();
+    registerServiceWorker();
     navigateTo('categories');
 }
 
 // Start the app
 document.addEventListener('DOMContentLoaded', init);
+
+// ===== Export for Testing =====
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        state,
+        generateId,
+        saveData,
+        loadData,
+        showToast,
+        getCurrentCategory,
+        getCurrentDeck,
+        navigateTo,
+        goBack,
+        escapeHtml,
+        openModal,
+        closeAllModals,
+        saveCategory,
+        saveDeck,
+        saveCard,
+        deleteItem,
+        initStudyMode,
+        updateStudyCard,
+        flipCard,
+        prevCard,
+        nextCard,
+        shuffleCards,
+        swipeHandler
+    };
+}
